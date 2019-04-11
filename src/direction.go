@@ -12,6 +12,8 @@ import (
 	"sync"
 	"os"
   "errors"
+  "strconv"
+  "path"
 
 	"github.com/patrickmn/go-cache"
 	"googlemaps.github.io/maps"
@@ -107,7 +109,7 @@ func Query_to_Key(c *maps.Client, req1 *maps.GeocodingRequest, req2 *maps.Geocod
 	return name1 + " - " + name2
 }
 
-func Drivable(lat1 string, lon1 string, lat1 string, lon2 string, api string) bool {
+func Drivable(lat1 string, lon1 string, lat2 string, lon2 string, api string) bool {
 	loc1 := lat1 + ", " + lon1
 	loc2 := lat2 + ", " + lon2
 	fmt.Println(loc1)
@@ -129,12 +131,12 @@ func Drivable(lat1 string, lon1 string, lat1 string, lon2 string, api string) bo
 
 	// request for reverse geocoding
 	geo1 := &maps.LatLng{
-		Lat: lat1,
-		Lng: lon1,
+		Lat: strconv.ParseFloat(lat1, 64),
+		Lng: strconv.ParseFloat(lon1, 64),
 	}
 	geo2 := &maps.LatLng{
-		Lat: lat2,
-		Lng: lon2,
+		Lat: strconv.ParseFloat(lat2, 64),
+		Lng: strconv.ParseFloat(lon2, 64),
 	}
 	geo_request1 := &maps.GeocodingRequest{
 		LatLng: geo1,
