@@ -21,7 +21,8 @@ import (
 type Driver struct{}
 
 type DirectionInfo struct {
-	Drivability bool
+	Drivability bool,
+  key string,
 }
 
 func (d *Driver) Drivable(locs [2]string, reply *DirectionInfo) error {
@@ -32,7 +33,7 @@ func (d *Driver) Drivable(locs [2]string, reply *DirectionInfo) error {
 	lon1 := strings.Fields(locs[0])[1]
 	lat2 := strings.Fields(locs[1])[0]
 	lon2 := strings.Fields(locs[1])[1]
-  api := "testing"
+  api := reply.key
 	reply.Drivability = Drivable(lat1, lon1, lat2, lon2, api)
 	return nil
 }
