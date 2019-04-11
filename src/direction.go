@@ -128,15 +128,18 @@ func Drivable(lat1 string, lon1 string, lat2 string, lon2 string, api string) bo
 		Mode:        maps.TravelModeDriving,
 		Avoid:       []maps.Avoid{"ferries"},
 	}
-
+  lat_g1, _ := strconv.ParseFloat(lat1, 64)
+  lon_g1, _ := strconv.ParseFloat(lon1, 64)
+  lat_g2, _ := strconv.ParseFloat(lat2, 64)
+  lon_g2, _ := strconv.ParseFloat(lon2, 64)
 	// request for reverse geocoding
 	geo1 := &maps.LatLng{
-		Lat: strconv.ParseFloat(lat1, 64),
-		Lng: strconv.ParseFloat(lon1, 64),
+		Lat: lat_g1,
+		Lng: lon_g1,
 	}
 	geo2 := &maps.LatLng{
-		Lat: strconv.ParseFloat(lat2, 64),
-		Lng: strconv.ParseFloat(lon2, 64),
+		Lat: lat_g2,
+		Lng: lon_g2,
 	}
 	geo_request1 := &maps.GeocodingRequest{
 		LatLng: geo1,
