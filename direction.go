@@ -1,18 +1,17 @@
 package direction
 
-
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
-	"strings"
-	"time"
-	"sync"
 	"os"
-  "errors"
-  "strconv"
-  "path"
+	"path"
+	"strconv"
+	"strings"
+	"sync"
+	"time"
 
 	"github.com/patrickmn/go-cache"
 	"googlemaps.github.io/maps"
@@ -25,11 +24,11 @@ type DirectionInfo struct {
 }
 
 type DirectionQuery struct {
-  Lat1 string
-  Lon1 string
-  Lat2 string
-  Lon2 string
-  Key string
+	Lat1 string
+	Lon1 string
+	Lat2 string
+	Lon2 string
+	Key  string
 }
 
 func (d *Driver) Drivable(locs DirectionQuery, reply *DirectionInfo) error {
@@ -40,8 +39,8 @@ func (d *Driver) Drivable(locs DirectionQuery, reply *DirectionInfo) error {
 	lon1 := locs.Lon1
 	lat2 := locs.Lat2
 	lon2 := locs.Lon2
-  api := locs.Key
-  fmt.Println(api)
+	api := locs.Key
+	// fmt.Println(api)
 	reply.Drivability = Drivable(lat1, lon1, lat2, lon2, api)
 	return nil
 }
@@ -51,7 +50,7 @@ var cacheLock sync.RWMutex
 var c *cache.Cache
 
 func LoadCache() {
-  cacheLock.Lock()
+	cacheLock.Lock()
 	// caching
 	// read the saved cache
 	data_json, err := ioutil.ReadFile(path.Join(os.Getenv("GOPATH"), "data/route_cache.json"))
@@ -67,9 +66,8 @@ func LoadCache() {
 	cacheLock.Unlock()
 	// create a cache
 	c = cache.NewFrom(cache.NoExpiration, 10*time.Minute, data)
-  return
+	return
 }
-
 
 func SaveCache(sigs chan os.Signal, done chan bool) {
 	<-sigs
@@ -86,7 +84,7 @@ func SaveCache(sigs chan os.Signal, done chan bool) {
 	return
 }
 
-func Query_to_Key(c *maps.Client, req1 *maps.GeocodingRequest, req2 *maps.GeocodingRequest) string {
+func Query_to_Key(c *maps.Client, req1 *maps.GeocodingRequest, req2 *maps.GeocodingRequest) (string, string) {
 	result1, err1 := c.ReverseGeocode(context.Background(), req1)
 	result2, err2 := c.ReverseGeocode(context.Background(), req2)
 	if err1 != nil || err2 != nil {
@@ -136,10 +134,10 @@ func Drivable(lat1 string, lon1 string, lat2 string, lon2 string, api string) bo
 		Mode:        maps.TravelModeDriving,
 		Avoid:       []maps.Avoid{"ferries"},
 	}
-  lat_g1, _ := strconv.ParseFloat(lat1, 64)
-  lon_g1, _ := strconv.ParseFloat(lon1, 64)
-  lat_g2, _ := strconv.ParseFloat(lat2, 64)
-  lon_g2, _ := strconv.ParseFloat(lon2, 64)
+	lat_g1, _ := strconv.ParseFloat(lat1, 64)
+	lon_g1, _ := strconv.ParseFloat(lon1, 64)
+	lat_g2, _ := strconv.ParseFloat(lat2, 64)
+	lon_g2, _ := strconv.ParseFloat(lon2, 64)
 	// request for reverse geocoding
 	geo1 := &maps.LatLng{
 		Lat: lat_g1,
@@ -156,12 +154,11 @@ func Drivable(lat1 string, lon1 string, lat2 string, lon2 string, api string) bo
 		LatLng: geo2,
 	}
 
-
 	// search for query in cache
 	var drivable bool
 	var search_result maps.Route
 
-  key1, key2 := Query_to_Key(client, geo_request1, geo_request2)
+	key1, key2 := Query_to_Key(client, geo_request1, geo_request2)
 
 	cached_1, found1 := c.Get(key1)
 	cached_2, found2 := c.Get(key2)
@@ -191,7 +188,7 @@ func Drivable(lat1 string, lon1 string, lat2 string, lon2 string, api string) bo
 			}
 		}
 	}
-  // the following only happens when not found in cache and got result from googlemaps
+	// the following only happens when not found in cache and got result from googlemaps
 
 	// now in route, it stores a map with all details from the direction api search
 	// result has the first direction from route
@@ -207,7 +204,7 @@ func Drivable(lat1 string, lon1 string, lat2 string, lon2 string, api string) bo
 			fmt.Println(search_result.Legs[0].Duration.String())
 		}
 	}
-  c.Set(key1), drivable, cache.NoExpiration)
+	c.Set(key1, drivable, cache.NoExpiration)
 	// fmt.Println(drivable)
 	return drivable
 }
