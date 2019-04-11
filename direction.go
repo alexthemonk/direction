@@ -67,7 +67,7 @@ func SaveCache(sigs chan os.Signal, done chan bool) {
 	cacheLock.RLock()
 
 	data_json, _ := json.Marshal(data)
-	err := ioutil.WriteFile("./route_cache.json", data_json, 0644)
+	err := ioutil.WriteFile(path.Join(os.Getenv("GOPATH"), "data/route_cache.json"), data_json, 0644)
 	if err != nil {
 		fmt.Printf("Unable to write file: %s", err)
 	}
