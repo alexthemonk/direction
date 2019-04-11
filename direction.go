@@ -22,18 +22,26 @@ type Driver struct{}
 
 type DirectionInfo struct {
 	Drivability bool
-  key string
 }
 
-func (d *Driver) Drivable(locs [2]string, reply *DirectionInfo) error {
+type DirectionQuery struct {
+  Lat1 string
+  Lon1 string
+  Lat2 string
+  Lon2 string
+  Key string
+}
+
+func (d *Driver) Drivable(locs DirectionQuery, reply *DirectionInfo) error {
 	if reply == nil {
 		return errors.New("Cannot be given nil")
 	}
-	lat1 := strings.Fields(locs[0])[0]
-	lon1 := strings.Fields(locs[0])[1]
-	lat2 := strings.Fields(locs[1])[0]
-	lon2 := strings.Fields(locs[1])[1]
-  api := reply.key
+	lat1 := locs.Lat1 
+	lon1 := locs.Lon1
+	lat2 := locs.Lat2
+	lon2 := locs.Lon2
+  api := locs.Key
+  fmt.Println(reply.Key)
 	reply.Drivability = Drivable(lat1, lon1, lat2, lon2, api)
 	return nil
 }

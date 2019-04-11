@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/rpc"
+	"strings"
 
 	"github.com/alexthemonk/drivability"
 )
@@ -20,8 +21,13 @@ func main() {
 	done := make(chan int)
 	go func() {
 		var reply direction.DirectionInfo
-		reply.key = "AIzaSyAXUo6I_JuyD4FHFFZfDji5E_20dl2G5tY"
-		err = client.Call("Driver.Drivable", test_input, &reply)
+		var query direction.DirectionQuery
+		query.Lat1 = strings.Fields(test_input[0])[0]
+		query.Lon1 = strings.Fields(test_input[0])[1]
+		query.Lat2 = strings.Fields(test_input[1])[0]
+		query.Lon2 = strings.Fields(test_input[1])[1]
+		query.Key = "AIzaSyAXUo6I_JuyD4FHFFZfDji5E_20dl2G5tY"
+		err = client.Call("Driver.Drivable", , &reply)
 		fmt.Println(reply.Drivability)
 		done <- 1
 	}()
