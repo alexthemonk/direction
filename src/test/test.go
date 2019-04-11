@@ -27,7 +27,7 @@ func main() {
 		query.Lat2 = strings.Fields(test_input[1])[0]
 		query.Lon2 = strings.Fields(test_input[1])[1]
 		query.Key = "AIzaSyAXUo6I_JuyD4FHFFZfDji5E_20dl2G5tY"
-		err = client.Call("Driver.Drivable", , &reply)
+		err = client.Call("Driver.Drivable", query, &reply)
 		fmt.Println(reply.Drivability)
 		done <- 1
 	}()

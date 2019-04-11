@@ -36,12 +36,12 @@ func (d *Driver) Drivable(locs DirectionQuery, reply *DirectionInfo) error {
 	if reply == nil {
 		return errors.New("Cannot be given nil")
 	}
-	lat1 := locs.Lat1 
+	lat1 := locs.Lat1
 	lon1 := locs.Lon1
 	lat2 := locs.Lat2
 	lon2 := locs.Lon2
   api := locs.Key
-  fmt.Println(reply.Key)
+  fmt.Println(api)
 	reply.Drivability = Drivable(lat1, lon1, lat2, lon2, api)
 	return nil
 }
@@ -114,7 +114,7 @@ func Query_to_Key(c *maps.Client, req1 *maps.GeocodingRequest, req2 *maps.Geocod
 	}
 	name2 := area2 + " " + country2
 	// THOUGHT: postal code instead of city name?
-	return name1 + " - " + name2
+	return name1 + " - " + name2, name2 + " - " + name1
 }
 
 func Drivable(lat1 string, lon1 string, lat2 string, lon2 string, api string) bool {
@@ -161,11 +161,18 @@ func Drivable(lat1 string, lon1 string, lat2 string, lon2 string, api string) bo
 	var drivable bool
 	var search_result maps.Route
 
-	cached_result, found := c.Get(Query_to_Key(client, geo_request1, geo_request2))
-	if found {
+  key1, key2 := Query_to_Key(client, geo_request1, geo_request2)
+
+	cached_1, found1 := c.Get(key1)
+	cached_2, found2 := c.Get(key2)
+	if found1 {
 		// already cached
 		fmt.Println("Found")
-		return cached_result.(bool)
+		return cached_1.(bool)
+	} else if found2 {
+		// already cached
+		fmt.Println("Found")
+		return cached_2.(bool)
 	} else {
 		// not in cache
 		// spend some money and search
@@ -200,7 +207,7 @@ func Drivable(lat1 string, lon1 string, lat2 string, lon2 string, api string) bo
 			fmt.Println(search_result.Legs[0].Duration.String())
 		}
 	}
-  c.Set(Query_to_Key(client, geo_request1, geo_request2), drivable, cache.NoExpiration)
+  c.Set(key1), drivable, cache.NoExpiration)
 	// fmt.Println(drivable)
 	return drivable
 }
