@@ -149,7 +149,6 @@ func Drivable(lat1 string, lon1 string, lat2 string, lon2 string, api string) bo
 
 
 	// search for query in cache
-	var result map[string]interface{}
 	var drivable bool
 	var search_result maps.Route
 
