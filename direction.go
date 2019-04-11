@@ -21,8 +21,8 @@ import (
 type Driver struct{}
 
 type DirectionInfo struct {
-	Drivability bool,
-  key string,
+	Drivability bool
+  key string
 }
 
 func (d *Driver) Drivable(locs [2]string, reply *DirectionInfo) error {
