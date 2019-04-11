@@ -11,6 +11,7 @@ import (
 	"time"
 	"sync"
 	"os"
+  "errors"
 
 	"github.com/patrickmn/go-cache"
 	"googlemaps.github.io/maps"
@@ -37,6 +38,7 @@ func (d *Driver) Drivable(locs [2]string, reply *DirectionInfo) error {
 
 var data map[string]cache.Item
 var cacheLock sync.RWMutex
+var c *cache.Cache
 
 func LoadCache() {
   cacheLock.Lock()
@@ -54,7 +56,7 @@ func LoadCache() {
 	}
 	cacheLock.Unlock()
 	// create a cache
-	c := cache.NewFrom(cache.NoExpiration, 10*time.Minute, data)
+	c = cache.NewFrom(cache.NoExpiration, 10*time.Minute, data)
   return
 }
 
@@ -105,9 +107,9 @@ func Query_to_Key(c *maps.Client, req1 *maps.GeocodingRequest, req2 *maps.Geocod
 	return name1 + " - " + name2
 }
 
-func Drivable(lat1 float64, lon1 float64, lat1 float64, lon2 float64, api string) bool {
-	loc1 := strconv.FormatFloat(lat1, 'f', -1, 64) + ", " + strconv.FormatFloat(lon1, 'f', -1, 64)
-	loc2 := strconv.FormatFloat(lat2, 'f', -1, 64) + ", " + strconv.FormatFloat(lon2, 'f', -1, 64)
+func Drivable(lat1 string, lon1 string, lat1 string, lon2 string, api string) bool {
+	loc1 := lat1 + ", " + lon1
+	loc2 := lat2 + ", " + lon2
 	fmt.Println(loc1)
 	fmt.Println(loc2)
 
