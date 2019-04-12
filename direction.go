@@ -66,6 +66,12 @@ func LoadCache() {
 	cacheLock.Unlock()
 	// create a cache
 	c = cache.NewFrom(cache.NoExpiration, 10*time.Minute, data)
+
+	// initialize the client for querying google api
+	client, err := maps.NewClient(maps.WithAPIKey(api))
+	if err != nil {
+		fmt.Println("Error initializing client: %s", err)
+	}
 	return
 }
 
@@ -120,12 +126,6 @@ func Drivable(lat1 string, lon1 string, lat2 string, lon2 string, api string) bo
 	loc2 := lat2 + ", " + lon2
 	fmt.Println(loc1)
 	fmt.Println(loc2)
-
-	// initialize the client for querying google api
-	client, err := maps.NewClient(maps.WithAPIKey(api))
-	if err != nil {
-		fmt.Println("Error initializing client: %s", err)
-	}
 
 	// query for direction
 	query := &maps.DirectionsRequest{
