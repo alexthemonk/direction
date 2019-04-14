@@ -48,8 +48,9 @@ func (d *Driver) Drivable(locs DirectionQuery, reply *DirectionInfo) error {
 var data map[string]cache.Item
 var cacheLock sync.RWMutex
 var c *cache.Cache
+var client *maps.Client
 
-func LoadCache() {
+func LoadCache(api string) {
 	cacheLock.Lock()
 	// caching
 	// read the saved cache
@@ -68,7 +69,7 @@ func LoadCache() {
 	c = cache.NewFrom(cache.NoExpiration, 10*time.Minute, data)
 
 	// initialize the client for querying google api
-	client, err := maps.NewClient(maps.WithAPIKey(api))
+	client, err = maps.NewClient(maps.WithAPIKey(api))
 	if err != nil {
 		fmt.Println("Error initializing client: %s", err)
 	}
