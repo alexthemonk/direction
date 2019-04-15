@@ -16,7 +16,7 @@ import (
 
 func main() {
 	fmt.Println("Loading Cache")
-	direction.LoadCache("AIzaSyAXUo6I_JuyD4FHFFZfDji5E_20dl2G5tY")
+	direction.LoadCache()
 	sigs := make(chan os.Signal)
 	done := make(chan bool)
 	signal.Notify(sigs, os.Interrupt, os.Kill)
