@@ -16,18 +16,18 @@ var data [][]string
 var result map[string]bool
 
 func main() {
-	test_data := "[[\"37.33939 -121.89496\",\"39.04372 -77.48749\"],[\"0 0\",\"0 0\"],[\"0 0\",\"50.11552 8.68417\"],[\"50.11552 8.68417\",\"50.11552 8.68417\"]]"
+	// test_data := "[[\"37.33939 -121.89496\",\"39.04372 -77.48749\"],[\"0 0\",\"0 0\"],[\"0 0\",\"50.11552 8.68417\"]]"
 	result = make(map[string]bool)
-	// data_json, err := ioutil.ReadFile(path.Join("../../data/", "location.json"))
-	// if err != nil {
-	// 	fmt.Println("Error loading data")
-	// 	return
-	// } else {
-	// 	// load cache
-	// 	fmt.Println("Loading data")
-	// 	json.Unmarshal(data_json, &data)
-	// }
-	json.Unmarshal([]byte(test_data), &data)
+	data_json, err := ioutil.ReadFile(path.Join("../../data/", "location.json"))
+	if err != nil {
+		fmt.Println("Error loading data")
+		return
+	} else {
+		// load cache
+		fmt.Println("Loading data")
+		json.Unmarshal(data_json, &data)
+	}
+	// json.Unmarshal([]byte(test_data), &data)
 
 	client, err := rpc.DialHTTP("tcp", "127.0.0.1:1279")
 	if err != nil {
