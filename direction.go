@@ -59,14 +59,15 @@ func LoadCache(api string) {
 		// previously no cache
 		// create new file
 		fmt.Println("Creating new cache file")
+		c = cache.New(cache.NoExpiration, 10*time.Minute)
 	} else {
 		// load cache
-		fmt.Println("Loading cache")
+		fmt.Println("Loading local cache file")
 		json.Unmarshal(data_json, &data)
+		c = cache.NewFrom(cache.NoExpiration, 10*time.Minute, data)
 	}
 	cacheLock.Unlock()
 	// create a cache
-	c = cache.NewFrom(cache.NoExpiration, 10*time.Minute, data)
 
 	// initialize the client for querying google api
 	client, err = maps.NewClient(maps.WithAPIKey(api))
