@@ -8,6 +8,7 @@ import (
 	"net/rpc"
 	"path"
 	"strings"
+	"os"
 
 	"github.com/alexthemonk/drivability"
 )
@@ -18,7 +19,7 @@ var result map[string]bool
 func main() {
 	// test_data := "[[\"37.33939 -121.89496\",\"39.04372 -77.48749\"],[\"0 0\",\"0 0\"],[\"0 0\",\"50.11552 8.68417\"]]"
 	result = make(map[string]bool)
-	data_json, err := ioutil.ReadFile(path.Join("../../data/", "location.json"))
+	data_json, err := ioutil.ReadFile(path.Join(os.Getenv("GOPATH"), "data/"+os.Args[1]))
 	if err != nil {
 		fmt.Println("Error loading data")
 		return
@@ -36,7 +37,7 @@ func main() {
 	}
 	res := make(chan map[string]bool)
 	count := 0
-	q_c := make(chan [2]string)
+	q_c := make(chan []string)
 
 	for _, d := range data {
 		// fmt.Println(i, detail[0], detail[1])
@@ -44,7 +45,7 @@ func main() {
 			q_c <- d
 			count ++
 			go func() {
-				detail <- q_c
+				detail := <- q_c
 				var reply direction.DirectionInfo
 				var query direction.DirectionQuery
 				query.Lat1 = strings.Fields(detail[0])[0]
@@ -71,7 +72,7 @@ func main() {
 	fmt.Println("Saving...")
 
 	dri_json, _ := json.Marshal(result)
-	err = ioutil.WriteFile(path.Join("../../data/", "drivibility.json"), dri_json, 0644)
+	err = ioutil.WriteFile(path.Join(os.Getenv("GOPATH"), "data/"+"drivable_"+os.Args[1]), dri_json, 0644)
 	if err != nil {
 		fmt.Printf("Unable to write file: %s", err)
 	}
