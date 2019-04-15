@@ -54,7 +54,7 @@ func LoadCache(api string) {
 	cacheLock.Lock()
 	// caching
 	// read the saved cache
-	data_json, err := ioutil.ReadFile(path.Join(os.Getenv("GOPATH"), "data/route_cache.json"))
+	data_json, err := ioutil.ReadFile(path.Join(os.Getenv("GOPATH"), "data/drivable_cache.json"))
 	if err != nil {
 		// previously no cache
 		// create new file
@@ -81,7 +81,7 @@ func SaveCache(sigs chan os.Signal, done chan bool) {
 	cacheLock.RLock()
 
 	data_json, _ := json.Marshal(data)
-	err := ioutil.WriteFile(path.Join(os.Getenv("GOPATH"), "data/route_cache.json"), data_json, 0644)
+	err := ioutil.WriteFile(path.Join(os.Getenv("GOPATH"), "data/drivable_cache.json"), data_json, 0644)
 	if err != nil {
 		fmt.Printf("Unable to write file: %s", err)
 	}
