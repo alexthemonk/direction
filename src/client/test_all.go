@@ -17,6 +17,7 @@ var data [][]string
 var result map[string]bool
 
 func main() {
+	limit := 100
 	// test_data := "[[\"37.33939 -121.89496\",\"39.04372 -77.48749\"],[\"0 0\",\"0 0\"],[\"0 0\",\"50.11552 8.68417\"]]"
 	result = make(map[string]bool)
 	data_json, err := ioutil.ReadFile(path.Join(os.Getenv("GOPATH"), "data/"+os.Args[1]))
@@ -35,9 +36,9 @@ func main() {
 		log.Fatal("dialing:", err)
 		return
 	}
-	res := make(chan map[string]bool, len(data))
+	res := make(chan map[string]bool, limit)
 	count := 0
-	q_c := make(chan []string, len(data))
+	q_c := make(chan []string, limit)
 
 	for _, d := range data {
 		// fmt.Println(i, detail[0], detail[1])
