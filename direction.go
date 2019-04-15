@@ -211,7 +211,7 @@ func Drivable(lat1 string, lon1 string, lat2 string, lon2 string, api string) bo
 			fmt.Println(search_result.Legs[0].Duration.String())
 		}
 	}
-	if !fail{
+	if !fail {
 		fmt.Println("Adding to Cache: ", key1, drivable)
 		c.Set(key1, drivable, cache.NoExpiration)
 	}
