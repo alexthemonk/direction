@@ -180,7 +180,7 @@ func Drivable(lat1 string, lon1 string, lat2 string, lon2 string, api string) bo
 	} else {
 		// not in cache
 		// spend some money and search
-		fmt.Println("Search and add to cache")
+		fmt.Println("Search")
 
 		route, _, err := client.Directions(context.Background(), query)
 		if err != nil {
@@ -212,6 +212,7 @@ func Drivable(lat1 string, lon1 string, lat2 string, lon2 string, api string) bo
 		}
 	}
 	if !fail{
+		fmt.Println("Adding to Cache: ", key1, drivable)
 		c.Set(key1, drivable, cache.NoExpiration)
 	}
 	// fmt.Println(drivable)
