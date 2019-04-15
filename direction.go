@@ -96,6 +96,7 @@ func Query_to_Key(c *maps.Client, req1 *maps.GeocodingRequest, req2 *maps.Geocod
 	result2, err2 := c.ReverseGeocode(context.Background(), req2)
 	if err1 != nil || err2 != nil {
 		fmt.Println("Error during reverse geocoding")
+		return "", ""
 	}
 	var area1 string
 	var country1 string
@@ -158,8 +159,13 @@ func Drivable(lat1 string, lon1 string, lat2 string, lon2 string, api string) bo
 	// search for query in cache
 	var drivable bool
 	var search_result maps.Route
+	var fail bool = false
 
 	key1, key2 := Query_to_Key(client, geo_request1, geo_request2)
+	if key1 == nil {
+		// reverse geolocation error
+		fail = true
+	}
 
 	cached_1, found1 := c.Get(key1)
 	cached_2, found2 := c.Get(key2)
@@ -205,7 +211,9 @@ func Drivable(lat1 string, lon1 string, lat2 string, lon2 string, api string) bo
 			fmt.Println(search_result.Legs[0].Duration.String())
 		}
 	}
-	c.Set(key1, drivable, cache.NoExpiration)
+	if !fail{
+		c.Set(key1, drivable, cache.NoExpiration)
+	}
 	// fmt.Println(drivable)
 	return drivable
 }
