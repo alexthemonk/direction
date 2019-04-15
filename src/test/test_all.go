@@ -35,14 +35,15 @@ func main() {
 		log.Fatal("dialing:", err)
 		return
 	}
-	res := make(chan map[string]bool)
+	res := make(chan map[string]bool, len(data))
 	count := 0
-	q_c := make(chan []string)
+	q_c := make(chan []string, len(data))
 
 	for _, d := range data {
 		// fmt.Println(i, detail[0], detail[1])
 		if d[0] != "0 0" && d[1] != "0 0"{
 			q_c <- d
+			fmt.Println("Start query: ", d)
 			count ++
 			go func() {
 				detail := <- q_c
