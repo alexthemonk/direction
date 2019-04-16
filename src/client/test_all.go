@@ -6,9 +6,9 @@ import (
 	"io/ioutil"
 	"log"
 	"net/rpc"
+	"os"
 	"path"
 	"strings"
-	"os"
 
 	"github.com/alexthemonk/drivability"
 )
@@ -42,30 +42,30 @@ func main() {
 
 	for _, d := range data {
 		// fmt.Println(i, detail[0], detail[1])
-		if d[0] != "0 0" && d[1] != "0 0"{
+		if d[0] != "0 0" && d[1] != "0 0" {
 			q_c <- d
 			fmt.Println("Start query: ", d)
-			count ++
+			count++
 			go func() {
-				detail := <- q_c
+				detail := <-q_c
 				var reply direction.DirectionInfo
 				var query direction.DirectionQuery
 				query.Lat1 = strings.Fields(detail[0])[0]
 				query.Lon1 = strings.Fields(detail[0])[1]
 				query.Lat2 = strings.Fields(detail[1])[0]
 				query.Lon2 = strings.Fields(detail[1])[1]
-				query.Key = "AIzaSyAXUo6I_JuyD4FHFFZfDji5E_20dl2G5tY"
+				query.Key = "InputAPIKey"
 				err = client.Call("Driver.Drivable", query, &reply)
-				res <- map[string]bool{detail[0]+","+detail[1]: reply.Drivability}
+				res <- map[string]bool{detail[0] + "," + detail[1]: reply.Drivability}
 				fmt.Println("Subroutine exiting: ", detail[0]+","+detail[1], ":", reply.Drivability)
 			}()
 		}
 	}
 
 	fmt.Println("Waiting...")
-	for i := 0; i < count; i ++ {
+	for i := 0; i < count; i++ {
 		fmt.Println("Appending...")
-		for k, v := range <- res {
+		for k, v := range <-res {
 			result[k] = v
 			fmt.Println("Subroutine Done Querying: ", k, v)
 		}
