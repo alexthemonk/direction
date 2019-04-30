@@ -11,9 +11,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
-	"time"
 
-	"github.com/patrickmn/go-cache"
 	"googlemaps.github.io/maps"
 )
 
@@ -45,25 +43,18 @@ func (d *Driver) Drivable(locs DirectionQuery, reply *DirectionInfo) error {
 	return nil
 }
 
-var data map[string]cache.Item
+var cache map[string]bool = make(map[string]bool)
 var cacheLock sync.RWMutex
-var c *cache.Cache
 
 func LoadCache() {
 	cacheLock.Lock()
 	// caching
 	// read the saved cache
 	data_json, err := ioutil.ReadFile(path.Join(os.Getenv("GOPATH"), "data/drivable_cache.json"))
-	if err != nil {
-		// previously no cache
-		// create new file
-		fmt.Println("Creating new cache file")
-		c = cache.New(cache.NoExpiration, 10*time.Minute)
-	} else {
+	if err == nil {
 		// load cache
 		fmt.Println("Loading local cache file")
-		json.Unmarshal(data_json, &data)
-		c = cache.NewFrom(cache.NoExpiration, 10*time.Minute, data)
+		json.Unmarshal(data_json, &cache)
 	}
 	cacheLock.Unlock()
 	// create a cache
@@ -75,11 +66,12 @@ func SaveCache(sigs chan os.Signal, done chan bool) {
 	<-sigs
 	cacheLock.RLock()
 
-	data_json, _ := json.Marshal(data)
+	data_json, _ := json.Marshal(cache)
 	err := ioutil.WriteFile(path.Join(os.Getenv("GOPATH"), "data/drivable_cache.json"), data_json, 0644)
 	if err != nil {
 		fmt.Printf("Unable to write file: %s", err)
 	}
+	fmt.Println("Cache Saved")
 
 	cacheLock.RUnlock()
 	done <- true
@@ -89,7 +81,7 @@ func SaveCache(sigs chan os.Signal, done chan bool) {
 func Query_to_Key(c *maps.Client, req1 *maps.GeocodingRequest, req2 *maps.GeocodingRequest) (string, string) {
 	result1, err1 := c.ReverseGeocode(context.Background(), req1)
 	result2, err2 := c.ReverseGeocode(context.Background(), req2)
-	if err1 != nil || err2 != nil {
+	if err1 != nil || err2 != nil || len(result1) == 0 || len(result2) == 0{
 		fmt.Println("Error during reverse geocoding")
 		return "", ""
 	}
@@ -102,7 +94,7 @@ func Query_to_Key(c *maps.Client, req1 *maps.GeocodingRequest, req2 *maps.Geocod
 			country1 += component.LongName
 		}
 	}
-	name1 := area1 + country1
+	name1 := area1 + " " +country1
 
 	var area2 string
 	var country2 string
@@ -168,16 +160,23 @@ func Drivable(lat1 string, lon1 string, lat2 string, lon2 string, api string) bo
 		fail = true
 	}
 
-	cached_1, found1 := c.Get(key1)
-	cached_2, found2 := c.Get(key2)
-	if found1 {
-		// already cached
-		fmt.Println("Found")
-		return cached_1.(bool)
-	} else if found2 {
-		// already cached
-		fmt.Println("Found")
-		return cached_2.(bool)
+	if !fail {
+		cacheLock.RLock()
+		temp, ok := cache[key1]
+		if ok {
+			drivable = temp
+		} else {
+			temp, ok = cache[key2]
+			if ok {
+				drivable = temp
+			}
+		}
+		cacheLock.RUnlock()
+		if ok {
+			fmt.Println("Found")
+			fmt.Println(drivable)
+			return drivable
+		}
 	} else {
 		// not in cache
 		// spend some money and search
@@ -214,7 +213,9 @@ func Drivable(lat1 string, lon1 string, lat2 string, lon2 string, api string) bo
 	}
 	if !fail {
 		fmt.Println("Adding to Cache: ", key1, drivable)
-		c.Set(key1, drivable, cache.NoExpiration)
+		cacheLock.Lock()
+		cache[key1] = drivable
+		cacheLock.Unlock()
 	}
 	// fmt.Println(drivable)
 	return drivable
