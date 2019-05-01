@@ -177,24 +177,25 @@ func Drivable(lat1 string, lon1 string, lat2 string, lon2 string, api string) bo
 			fmt.Println(drivable)
 			return drivable
 		}
-	} else {
+	}
 		// not in cache
 		// spend some money and search
-		fmt.Println("Search")
+	fmt.Println("Search")
 
-		route, _, err := client.Directions(context.Background(), query)
-		if err != nil {
-			fmt.Println("Error during get direction: %s", err)
+	route, _, err := client.Directions(context.Background(), query)
+	fmt.Println(route)
+	if err != nil {
+		fmt.Println("Error during get direction: %s", err)
+	} else {
+		if len(route) > 0 {
+			search_result = route[0]
+			drivable = true
 		} else {
-			if len(route) > 0 {
-				search_result = route[0]
-				drivable = true
-			} else {
-				fmt.Println("Not drivable")
-				drivable = false
-			}
+			fmt.Println("Not drivable")
+			drivable = false
 		}
 	}
+
 	// the following only happens when not found in cache and got result from googlemaps
 
 	// now in route, it stores a map with all details from the direction api search
