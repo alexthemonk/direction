@@ -151,7 +151,7 @@ func Drivable(lat1 string, lon1 string, lat2 string, lon2 string, api string) bo
 
 	// search for query in cache
 	var drivable bool
-	var search_result maps.Route
+	var search_result []byte
 	var fail bool = false
 
 	key1, key2 := Query_to_Key(client, geo_request1, geo_request2)
@@ -183,12 +183,12 @@ func Drivable(lat1 string, lon1 string, lat2 string, lon2 string, api string) bo
 	fmt.Println("Search")
 
 	route, _, err := client.Directions(context.Background(), query)
-	fmt.Println(route)
 	if err != nil {
 		fmt.Println("Error during get direction: %s", err)
 	} else {
 		if len(route) > 0 {
-			search_result = route[0]
+			search_result, _ = route[0].Legs[0].MarshalJSON()
+			fmt.Println(string(search_result))
 			drivable = true
 		} else {
 			fmt.Println("Not drivable")
@@ -209,7 +209,7 @@ func Drivable(lat1 string, lon1 string, lat2 string, lon2 string, api string) bo
 		if strings.Contains(temp_s, "ferry") || strings.Contains(temp_s, "ferries") || strings.Contains(temp_s, "tunnel") {
 			drivable = false
 		} else {
-			fmt.Println(search_result.Legs[0].Duration.String())
+			fmt.Println(route[0].Legs[0].Duration.String())
 		}
 	}
 	if !fail {
