@@ -83,7 +83,13 @@ func Query_to_Key(c *maps.Client, req1 *maps.GeocodingRequest, req2 *maps.Geocod
 	result2, err2 := c.ReverseGeocode(context.Background(), req2)
 	if err1 != nil || err2 != nil || len(result1) == 0 || len(result2) == 0{
 		fmt.Println("Error during reverse geocoding")
-		return "", ""
+		k1 := fmt.Sprintf("%.2f,%.2f - %.2f,%.2f",
+											req1.LatLng.Lat, req1.LatLng.Lng,
+											req2.LatLng.Lat, req2.LatLng.Lng)
+		k2 := fmt.Sprintf("%.2f,%.2f - %.2f,%.2f",
+											req2.LatLng.Lat, req2.LatLng.Lng,
+											req1.LatLng.Lat, req1.LatLng.Lng)
+		return k1, k2
 	}
 	var area1 string
 	var country1 string
