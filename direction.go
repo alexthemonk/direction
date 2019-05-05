@@ -184,8 +184,19 @@ func Drivable(lat1 string, lon1 string, lat2 string, lon2 string, api string) bo
 			return drivable
 		}
 	}
-		// not in cache
-		// spend some money and search
+	// not in cache
+	// if start and end at same city
+	// save true
+	if key1 == key2 {
+		drivable = true
+		fmt.Println("Adding to Cache: ", key1, drivable)
+		cacheLock.Lock()
+		cache[key1] = drivable
+		cacheLock.Unlock()
+		return drivable
+	}
+
+	// spend some money and search
 	fmt.Println("Search")
 
 	route, _, err := client.Directions(context.Background(), query)
@@ -194,7 +205,7 @@ func Drivable(lat1 string, lon1 string, lat2 string, lon2 string, api string) bo
 	} else {
 		if len(route) > 0 {
 			search_result, _ = route[0].Legs[0].MarshalJSON()
-			fmt.Println(string(search_result))
+			// fmt.Println(string(search_result))
 			drivable = true
 		} else {
 			fmt.Println("Not drivable")
