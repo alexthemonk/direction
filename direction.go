@@ -90,10 +90,10 @@ func Query_to_Key(g geo.Geocoder, geo1 Geo, geo2 Geo) (string, string) {
 	result2, err2 := g.ReverseGeocode(geo2.Lat, geo2.Lon)
 	if err1 != nil || err2 != nil {
 		fmt.Println("Error during reverse geocoding")
-		k1 := fmt.Sprintf("%.2f,%.2f - %.2f,%.2f",
+		k1 := fmt.Sprintf("%.0f,%.0f - %.0f,%.0f",
 			geo1.Lat, geo1.Lon,
 			geo2.Lat, geo2.Lon)
-		k2 := fmt.Sprintf("%.2f,%.2f - %.2f,%.2f",
+		k2 := fmt.Sprintf("%.0f,%.0f - %.0f,%.0f",
 			geo2.Lat, geo2.Lon,
 			geo1.Lat, geo1.Lon)
 		return k1, k2
