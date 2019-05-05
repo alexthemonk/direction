@@ -12,9 +12,9 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/codingsince1985/geo-golang"
+	"github.com/codingsince1985/geo-golang/openstreetmap"
 	"googlemaps.github.io/maps"
-  "github.com/codingsince1985/geo-golang/openstreetmap"
-  "github.com/codingsince1985/geo-golang"
 )
 
 type Driver struct{}
@@ -88,14 +88,14 @@ type Geo struct {
 func Query_to_Key(g geo.Geocoder, geo1 Geo, geo2 Geo) (string, string) {
 	result1, err1 := g.ReverseGeocode(geo1.Lat, geo1.Lon)
 	result2, err2 := g.ReverseGeocode(geo2.Lat, geo2.Lon)
-	if err1 != nil || err2 != nil{
+	if err1 != nil || err2 != nil {
 		fmt.Println("Error during reverse geocoding")
 		k1 := fmt.Sprintf("%.2f,%.2f - %.2f,%.2f",
-											geo1.Lat, geo1.Lon,
-											geo2.Lat, geo2.Lon)
+			geo1.Lat, geo1.Lon,
+			geo2.Lat, geo2.Lon)
 		k2 := fmt.Sprintf("%.2f,%.2f - %.2f,%.2f",
-											geo2.Lat, geo2.Lon,
-											geo1.Lat, geo1.Lon)
+			geo2.Lat, geo2.Lon,
+			geo1.Lat, geo1.Lon)
 		return k1, k2
 	}
 	name1 := result1.State + " " + result1.Country
@@ -128,8 +128,8 @@ func Drivable(lat1 string, lon1 string, lat2 string, lon2 string, api string) bo
 	lat_g2, _ := strconv.ParseFloat(lat2, 64)
 	lon_g2, _ := strconv.ParseFloat(lon2, 64)
 
-	geo1 := Geo{ Lat: lat_g1, Lon: lon_g1}
-	geo2 := Geo{ Lat: lat_g2, Lon: lon_g2}
+	geo1 := Geo{Lat: lat_g1, Lon: lon_g1}
+	geo2 := Geo{Lat: lat_g2, Lon: lon_g2}
 
 	// search for query in cache
 	var drivable bool
