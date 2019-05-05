@@ -13,6 +13,8 @@ import (
 	"sync"
 
 	"googlemaps.github.io/maps"
+  "github.com/codingsince1985/geo-golang/openstreetmap"
+  "github.com/codingsince1985/geo-golang"
 )
 
 type Driver struct{}
@@ -78,40 +80,26 @@ func SaveCache(sigs chan os.Signal, done chan bool) {
 	return
 }
 
-func Query_to_Key(c *maps.Client, req1 *maps.GeocodingRequest, req2 *maps.GeocodingRequest) (string, string) {
-	result1, err1 := c.ReverseGeocode(context.Background(), req1)
-	result2, err2 := c.ReverseGeocode(context.Background(), req2)
-	if err1 != nil || err2 != nil || len(result1) == 0 || len(result2) == 0{
+type Geo struct {
+	Lat float64
+	Lon float64
+}
+
+func Query_to_Key(g geo.Geocoder, geo1 Geo, geo2 Geo) (string, string) {
+	result1, err1 := g.ReverseGeocode(geo1.Lat, geo1.Lon)
+	result2, err2 := g.ReverseGeocode(geo2.Lat, geo2.Lon)
+	if err1 != nil || err2 != nil{
 		fmt.Println("Error during reverse geocoding")
 		k1 := fmt.Sprintf("%.2f,%.2f - %.2f,%.2f",
-											req1.LatLng.Lat, req1.LatLng.Lng,
-											req2.LatLng.Lat, req2.LatLng.Lng)
+											geo1.Lat, geo1.Lon,
+											geo2.Lat, geo2.Lon)
 		k2 := fmt.Sprintf("%.2f,%.2f - %.2f,%.2f",
-											req2.LatLng.Lat, req2.LatLng.Lng,
-											req1.LatLng.Lat, req1.LatLng.Lng)
+											geo2.Lat, geo2.Lon,
+											geo1.Lat, geo1.Lon)
 		return k1, k2
 	}
-	var area1 string
-	var country1 string
-	for _, component := range result1[0].AddressComponents {
-		if component.Types[0] == "administrative_area_level_1" {
-			area1 = component.LongName
-		} else if component.Types[0] == "country" {
-			country1 += component.LongName
-		}
-	}
-	name1 := area1 + " " +country1
-
-	var area2 string
-	var country2 string
-	for _, component := range result2[0].AddressComponents {
-		if component.Types[0] == "administrative_area_level_1" {
-			area2 = component.LongName
-		} else if component.Types[0] == "country" {
-			country2 += component.LongName
-		}
-	}
-	name2 := area2 + " " + country2
+	name1 := result1.State + " " + result1.Country
+	name2 := result2.State + " " + result2.Country
 	// THOUGHT: postal code instead of city name?
 	return name1 + " - " + name2, name2 + " - " + name1
 }
@@ -139,28 +127,18 @@ func Drivable(lat1 string, lon1 string, lat2 string, lon2 string, api string) bo
 	lon_g1, _ := strconv.ParseFloat(lon1, 64)
 	lat_g2, _ := strconv.ParseFloat(lat2, 64)
 	lon_g2, _ := strconv.ParseFloat(lon2, 64)
-	// request for reverse geocoding
-	geo1 := &maps.LatLng{
-		Lat: lat_g1,
-		Lng: lon_g1,
-	}
-	geo2 := &maps.LatLng{
-		Lat: lat_g2,
-		Lng: lon_g2,
-	}
-	geo_request1 := &maps.GeocodingRequest{
-		LatLng: geo1,
-	}
-	geo_request2 := &maps.GeocodingRequest{
-		LatLng: geo2,
-	}
+
+	geo1 := Geo{ Lat: lat_g1, Lon: lon_g1}
+	geo2 := Geo{ Lat: lat_g2, Lon: lon_g2}
 
 	// search for query in cache
 	var drivable bool
 	var search_result []byte
 	var fail bool = false
 
-	key1, key2 := Query_to_Key(client, geo_request1, geo_request2)
+	g := openstreetmap.Geocoder()
+
+	key1, key2 := Query_to_Key(g, geo1, geo2)
 	if key1 == "" {
 		// reverse geolocation error
 		fail = true

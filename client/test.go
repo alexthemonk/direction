@@ -11,7 +11,7 @@ import (
 
 func main() {
 
-	test_input := [2]string{"48.6803404 1.9421686", "52.7602109 -0.8134228"}
+	test_input := [2]string{"39.04372 -77.48749", "48.93333 2.36667"}
 
 	client, err := rpc.DialHTTP("tcp", "127.0.0.1:1279")
 	if err != nil {
