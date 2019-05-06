@@ -13,7 +13,7 @@ import (
 	"sync"
 
 	"github.com/codingsince1985/geo-golang"
-	"github.com/codingsince1985/geo-golang/openstreetmap"
+	// "github.com/codingsince1985/geo-golang/openstreetmap"
 	"googlemaps.github.io/maps"
 )
 
@@ -104,6 +104,16 @@ func Query_to_Key(g geo.Geocoder, geo1 Geo, geo2 Geo) (string, string) {
 	return name1 + " - " + name2, name2 + " - " + name1
 }
 
+func Query_to_Key_Nonreverse(geo1 Geo, geo2 Geo) (string, string) {
+	k1 := fmt.Sprintf("%.0f,%.0f - %.0f,%.0f",
+		geo1.Lat, geo1.Lon,
+		geo2.Lat, geo2.Lon)
+	k2 := fmt.Sprintf("%.0f,%.0f - %.0f,%.0f",
+		geo2.Lat, geo2.Lon,
+		geo1.Lat, geo1.Lon)
+	return k1, k2
+}
+
 func Drivable(lat1 string, lon1 string, lat2 string, lon2 string, api string) bool {
 	loc1 := lat1 + ", " + lon1
 	loc2 := lat2 + ", " + lon2
@@ -136,9 +146,10 @@ func Drivable(lat1 string, lon1 string, lat2 string, lon2 string, api string) bo
 	var search_result []byte
 	var fail bool = false
 
-	g := openstreetmap.Geocoder()
+	// g := openstreetmap.Geocoder()
 
-	key1, key2 := Query_to_Key(g, geo1, geo2)
+	// key1, key2 := Query_to_Key(g, geo1, geo2)
+	key1, key2 := Query_to_Key_Nonreverse(geo1, geo2)
 	if key1 == "" {
 		// reverse geolocation error
 		fail = true
