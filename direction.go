@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/codingsince1985/geo-golang"
 	// "github.com/codingsince1985/geo-golang/openstreetmap"
@@ -190,7 +191,15 @@ func Drivable(lat1 string, lon1 string, lat2 string, lon2 string, api string) bo
 
 	route, _, err := client.Directions(context.Background(), query)
 	if err != nil {
-		fmt.Println("Error during get direction: %s", err)
+		fail = true
+		time.Sleep(time.Second*2)
+		route, _, err = client.Directions(context.Background(), query)
+		if err != nil {
+			fmt.Println("Error during get direction: %s", err)
+			fail = true
+		} else {
+			fail = false
+		}
 	} else {
 		if len(route) > 0 {
 			search_result, _ = route[0].Legs[0].MarshalJSON()
