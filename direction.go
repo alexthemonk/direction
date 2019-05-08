@@ -13,7 +13,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/codingsince1985/geo-golang"
+	// "github.com/codingsince1985/geo-golang"
 	// "github.com/codingsince1985/geo-golang/openstreetmap"
 	"googlemaps.github.io/maps"
 )
@@ -32,6 +32,11 @@ type DirectionQuery struct {
 	Key  string
 }
 
+type Drivability struct{
+	Drivable bool `json:"drivable"`
+	Text string `json:"text"`
+}
+
 func (d *Driver) Drivable(locs DirectionQuery, reply *DirectionInfo) error {
 	if reply == nil {
 		return errors.New("Cannot be given nil")
@@ -46,7 +51,7 @@ func (d *Driver) Drivable(locs DirectionQuery, reply *DirectionInfo) error {
 	return nil
 }
 
-var cache map[string]bool = make(map[string]bool)
+var cache map[string]Drivability = make(map[string]Drivability)
 var cacheLock sync.RWMutex
 
 func LoadCache() {
@@ -86,24 +91,24 @@ type Geo struct {
 	Lon float64
 }
 
-func Query_to_Key(g geo.Geocoder, geo1 Geo, geo2 Geo) (string, string) {
-	result1, err1 := g.ReverseGeocode(geo1.Lat, geo1.Lon)
-	result2, err2 := g.ReverseGeocode(geo2.Lat, geo2.Lon)
-	if err1 != nil || err2 != nil {
-		fmt.Println("Error during reverse geocoding")
-		k1 := fmt.Sprintf("%.2f,%.2f - %.2f,%.2f",
-			geo1.Lat, geo1.Lon,
-			geo2.Lat, geo2.Lon)
-		k2 := fmt.Sprintf("%.2f,%.2f - %.2f,%.2f",
-			geo2.Lat, geo2.Lon,
-			geo1.Lat, geo1.Lon)
-		return k1, k2
-	}
-	name1 := result1.State + " " + result1.Country
-	name2 := result2.State + " " + result2.Country
-	// THOUGHT: postal code instead of city name?
-	return name1 + " - " + name2, name2 + " - " + name1
-}
+// func Query_to_Key(g geo.Geocoder, geo1 Geo, geo2 Geo) (string, string) {
+// 	result1, err1 := g.ReverseGeocode(geo1.Lat, geo1.Lon)
+// 	result2, err2 := g.ReverseGeocode(geo2.Lat, geo2.Lon)
+// 	if err1 != nil || err2 != nil {
+// 		fmt.Println("Error during reverse geocoding")
+// 		k1 := fmt.Sprintf("%.2f,%.2f - %.2f,%.2f",
+// 			geo1.Lat, geo1.Lon,
+// 			geo2.Lat, geo2.Lon)
+// 		k2 := fmt.Sprintf("%.2f,%.2f - %.2f,%.2f",
+// 			geo2.Lat, geo2.Lon,
+// 			geo1.Lat, geo1.Lon)
+// 		return k1, k2
+// 	}
+// 	name1 := result1.State + " " + result1.Country
+// 	name2 := result2.State + " " + result2.Country
+// 	// THOUGHT: postal code instead of city name?
+// 	return name1 + " - " + name2, name2 + " - " + name1
+// }
 
 func Query_to_Key_Nonreverse(geo1 Geo, geo2 Geo) (string, string) {
 	k1 := fmt.Sprintf("%.0f,%.0f - %.0f,%.0f",
@@ -160,11 +165,11 @@ func Drivable(lat1 string, lon1 string, lat2 string, lon2 string, api string) bo
 		cacheLock.RLock()
 		temp, ok := cache[key1]
 		if ok {
-			drivable = temp
+			drivable = temp.Drivable
 		} else {
 			temp, ok = cache[key2]
 			if ok {
-				drivable = temp
+				drivable = temp.Drivable
 			}
 		}
 		cacheLock.RUnlock()
@@ -178,12 +183,10 @@ func Drivable(lat1 string, lon1 string, lat2 string, lon2 string, api string) bo
 	// if start and end at same city
 	// save true
 	if key1 == key2 {
-		drivable = true
-		fmt.Println("Adding to Cache: ", key1, drivable)
 		cacheLock.Lock()
-		cache[key1] = drivable
+		cache[key1] = Drivability{ Drivable: true, Text: "" }
 		cacheLock.Unlock()
-		return drivable
+		return true
 	}
 
 	// spend some money and search
@@ -218,9 +221,9 @@ func Drivable(lat1 string, lon1 string, lat2 string, lon2 string, api string) bo
 	// result['legs'] has all the dirving
 	// not sure why it is an array
 	// for now just index the first element of legs
+	var temp_s string = strings.ToLower(fmt.Sprintf("%s", search_result))
 	if drivable {
 		// result from search
-		var temp_s string = strings.ToLower(fmt.Sprintf("%s", search_result))
 		if strings.Contains(temp_s, "ferry") || strings.Contains(temp_s, "ferries") || strings.Contains(temp_s, "tunnel") {
 			drivable = false
 		} else {
@@ -230,7 +233,7 @@ func Drivable(lat1 string, lon1 string, lat2 string, lon2 string, api string) bo
 	if !fail {
 		fmt.Println("Adding to Cache: ", key1, drivable)
 		cacheLock.Lock()
-		cache[key1] = drivable
+		cache[key1] = Drivability{ Drivable: drivable, Text: temp_s }
 		cacheLock.Unlock()
 	}
 	// fmt.Println(drivable)
