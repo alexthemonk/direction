@@ -10,7 +10,7 @@ import (
 	"strings"
 	"os"
 
-	"direction"
+	"github.com/alexthemonk/direction"
 )
 
 var data [][]string
