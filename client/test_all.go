@@ -10,7 +10,7 @@ import (
 	"strings"
 	"os"
 
-	"github.com/alexthemonk/drivability"
+	"direction"
 )
 
 var data [][]string
