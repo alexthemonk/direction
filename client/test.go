@@ -6,7 +6,7 @@ import (
 	"net/rpc"
 	"strings"
 
-	"direction"
+	"github.com/alexthemonk/direction"
 )
 
 func main() {
