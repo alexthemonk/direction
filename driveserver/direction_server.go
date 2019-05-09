@@ -9,7 +9,7 @@ import (
 	"os"
 	"os/signal"
 
-	"direction"
+	"github.com/alexthemonk/direction"
 )
 
 // Server bootstraping /////////////////////////////////////////////////////////
