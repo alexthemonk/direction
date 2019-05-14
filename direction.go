@@ -24,11 +24,14 @@ type DirectionInfo struct {
 	Drivability bool
 }
 
+type Coordinates struct {
+	Latitude  float64
+	Longitude float64
+}
+
 type DirectionQuery struct {
-	Lat1 string
-	Lon1 string
-	Lat2 string
-	Lon2 string
+	Coord1 Coordinates 
+	Coord2 Coordinates
 	Key  string
 }
 
@@ -41,10 +44,10 @@ func (d *Driver) Drivable(locs DirectionQuery, reply *DirectionInfo) error {
 	if reply == nil {
 		return errors.New("Cannot be given nil")
 	}
-	lat1 := locs.Lat1
-	lon1 := locs.Lon1
-	lat2 := locs.Lat2
-	lon2 := locs.Lon2
+	lat1 := fmt.Sprintf("%f", locs.Coord1.Latitude)
+	lon1 := fmt.Sprintf("%f", locs.Coord1.Longitude)
+	lat2 := fmt.Sprintf("%f", locs.Coord2.Latitude)
+	lon2 := fmt.Sprintf("%f", locs.Coord2.Latitude)
 	api := locs.Key
 	// fmt.Println(api)
 	reply.Drivability = Drivable(lat1, lon1, lat2, lon2, api)
