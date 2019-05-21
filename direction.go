@@ -30,14 +30,14 @@ type Coordinates struct {
 }
 
 type DirectionQuery struct {
-	Coord1 Coordinates 
+	Coord1 Coordinates
 	Coord2 Coordinates
-	Key  string
+	Key    string
 }
 
-type Drivability struct{
-	Drivable bool `json:"drivable"`
-	Text string `json:"text"`
+type Drivability struct {
+	Drivable bool   `json:"drivable"`
+	Text     string `json:"text"`
 }
 
 func (d *Driver) Drivable(locs DirectionQuery, reply *DirectionInfo) error {
@@ -47,7 +47,7 @@ func (d *Driver) Drivable(locs DirectionQuery, reply *DirectionInfo) error {
 	lat1 := fmt.Sprintf("%f", locs.Coord1.Latitude)
 	lon1 := fmt.Sprintf("%f", locs.Coord1.Longitude)
 	lat2 := fmt.Sprintf("%f", locs.Coord2.Latitude)
-	lon2 := fmt.Sprintf("%f", locs.Coord2.Latitude)
+	lon2 := fmt.Sprintf("%f", locs.Coord2.Longitude)
 	api := locs.Key
 	// fmt.Println(api)
 	reply.Drivability = Drivable(lat1, lon1, lat2, lon2, api)
@@ -187,7 +187,7 @@ func Drivable(lat1 string, lon1 string, lat2 string, lon2 string, api string) bo
 	// save true
 	if key1 == key2 {
 		cacheLock.Lock()
-		cache[key1] = Drivability{ Drivable: true, Text: "" }
+		cache[key1] = Drivability{Drivable: true, Text: ""}
 		cacheLock.Unlock()
 		return true
 	}
@@ -198,7 +198,7 @@ func Drivable(lat1 string, lon1 string, lat2 string, lon2 string, api string) bo
 	route, _, err := client.Directions(context.Background(), query)
 	if err != nil {
 		fail = true
-		time.Sleep(time.Second*2)
+		time.Sleep(time.Second * 2)
 		route, _, err = client.Directions(context.Background(), query)
 		if err != nil {
 			fmt.Println("Error during get direction: %s", err)
@@ -236,7 +236,7 @@ func Drivable(lat1 string, lon1 string, lat2 string, lon2 string, api string) bo
 	if !fail {
 		fmt.Println("Adding to Cache: ", key1, drivable)
 		cacheLock.Lock()
-		cache[key1] = Drivability{ Drivable: drivable, Text: temp_s }
+		cache[key1] = Drivability{Drivable: drivable, Text: temp_s}
 		cacheLock.Unlock()
 	}
 	// fmt.Println(drivable)
