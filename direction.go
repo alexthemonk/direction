@@ -216,9 +216,17 @@ func Drivable(lat1 string, lon1 string, lat2 string, lon2 string, api string) bo
 			}
 		} else {
 			if len(route) > 0 {
-				search_result, _ = route[0].Legs[0].MarshalJSON()
+				for _, r := range route {
+					search_result, _ = r.Legs[0].MarshalJSON()
+					temp_s = strings.ToLower(fmt.Sprintf("%s", search_result))
+					if strings.Contains(temp_s, "ferry") || strings.Contains(temp_s, "ferries") {
+						drivable = false
+					} else {
+						drivable = true
+						break
+					}
+				}
 				// fmt.Println(string(search_result))
-				drivable = true
 			} else {
 				fmt.Println("Not drivable")
 				drivable = false
@@ -233,15 +241,7 @@ func Drivable(lat1 string, lon1 string, lat2 string, lon2 string, api string) bo
 	// result['legs'] has all the dirving
 	// not sure why it is an array
 	// for now just index the first element of legs
-	temp_s = strings.ToLower(fmt.Sprintf("%s", search_result))
-	if drivable {
-		// result from search
-		if strings.Contains(temp_s, "ferry") || strings.Contains(temp_s, "ferries") {
-			drivable = false
-		} else {
-			fmt.Println(route[0].Legs[0].Duration.String())
-		}
-	}
+
 	if !fail {
 		fmt.Println("Adding to Cache: ", key1, drivable)
 		cacheLock.Lock()
