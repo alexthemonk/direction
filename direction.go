@@ -236,7 +236,7 @@ func Drivable(lat1 string, lon1 string, lat2 string, lon2 string, api string) bo
 	temp_s = strings.ToLower(fmt.Sprintf("%s", search_result))
 	if drivable {
 		// result from search
-		if strings.Contains(temp_s, "ferry") || strings.Contains(temp_s, "ferries")) {
+		if strings.Contains(temp_s, "ferry") || strings.Contains(temp_s, "ferries") {
 			drivable = false
 		} else {
 			fmt.Println(route[0].Legs[0].Duration.String())
