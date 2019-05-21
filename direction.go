@@ -154,6 +154,8 @@ func Drivable(lat1 string, lon1 string, lat2 string, lon2 string, api string) bo
 	var drivable bool
 	var search_result []byte
 	var fail bool = false
+	var has_text bool = false
+	var temp_s string
 
 	// g := openstreetmap.Geocoder()
 
@@ -179,7 +181,12 @@ func Drivable(lat1 string, lon1 string, lat2 string, lon2 string, api string) bo
 		if ok {
 			fmt.Println("Found")
 			fmt.Println(drivable)
-			return drivable
+			if temp.Text == "" {
+				return drivable
+			} else {
+				has_text = true
+				temp_s = temp.Text
+			}
 		}
 	}
 	// not in cache
@@ -195,25 +202,27 @@ func Drivable(lat1 string, lon1 string, lat2 string, lon2 string, api string) bo
 	// spend some money and search
 	fmt.Println("Search")
 
-	route, _, err := client.Directions(context.Background(), query)
-	if err != nil {
-		fail = true
-		time.Sleep(time.Second * 2)
-		route, _, err = client.Directions(context.Background(), query)
+	if !has_text {
+		route, _, err := client.Directions(context.Background(), query)
 		if err != nil {
-			fmt.Println("Error during get direction: %s", err)
 			fail = true
+			time.Sleep(time.Second * 2)
+			route, _, err = client.Directions(context.Background(), query)
+			if err != nil {
+				fmt.Println("Error during get direction: %s", err)
+				fail = true
+			} else {
+				fail = false
+			}
 		} else {
-			fail = false
-		}
-	} else {
-		if len(route) > 0 {
-			search_result, _ = route[0].Legs[0].MarshalJSON()
-			// fmt.Println(string(search_result))
-			drivable = true
-		} else {
-			fmt.Println("Not drivable")
-			drivable = false
+			if len(route) > 0 {
+				search_result, _ = route[0].Legs[0].MarshalJSON()
+				// fmt.Println(string(search_result))
+				drivable = true
+			} else {
+				fmt.Println("Not drivable")
+				drivable = false
+			}
 		}
 	}
 
@@ -224,10 +233,10 @@ func Drivable(lat1 string, lon1 string, lat2 string, lon2 string, api string) bo
 	// result['legs'] has all the dirving
 	// not sure why it is an array
 	// for now just index the first element of legs
-	var temp_s string = strings.ToLower(fmt.Sprintf("%s", search_result))
+	temp_s = strings.ToLower(fmt.Sprintf("%s", search_result))
 	if drivable {
 		// result from search
-		if strings.Contains(temp_s, "ferry") || strings.Contains(temp_s, "ferries") || strings.Contains(temp_s, "tunnel") {
+		if strings.Contains(temp_s, "ferry") || strings.Contains(temp_s, "ferries")) {
 			drivable = false
 		} else {
 			fmt.Println(route[0].Legs[0].Duration.String())
