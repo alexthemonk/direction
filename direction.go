@@ -186,6 +186,11 @@ func Drivable(lat1 string, lon1 string, lat2 string, lon2 string, api string) bo
 			} else {
 				has_text = true
 				temp_s = temp.Text
+				if strings.Contains(temp_s, "ferry") || strings.Contains(temp_s, "ferries") {
+					drivable = false
+				} else {
+					drivable = true
+				}
 			}
 		}
 	}
@@ -199,10 +204,9 @@ func Drivable(lat1 string, lon1 string, lat2 string, lon2 string, api string) bo
 		return true
 	}
 
-	// spend some money and search
-	fmt.Println("Search")
-
 	if !has_text {
+		// spend some money and search
+		fmt.Println("Search")
 		route, _, err := client.Directions(context.Background(), query)
 		if err != nil {
 			fail = true
