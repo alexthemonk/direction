@@ -208,7 +208,7 @@ func Drivable(lat1 string, lon1 string, lat2 string, lon2 string, api string) fl
 		cacheLock.Lock()
 		cache[key1] = Drivability{Drivable: 0.0, Text: ""}
 		cacheLock.Unlock()
-		return true
+		return 0.0
 	}
 
 	if !has_text {
