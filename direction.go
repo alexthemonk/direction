@@ -21,7 +21,7 @@ import (
 type Driver struct{}
 
 type DirectionInfo struct {
-	Drivability bool
+	Drivability float64
 }
 
 type Coordinates struct {
@@ -36,8 +36,8 @@ type DirectionQuery struct {
 }
 
 type Drivability struct {
-	Drivable bool   `json:"drivable"`
-	Text     string `json:"text"`
+	Drivable float64 `json:"drivable"`
+	Text     string  `json:"text"`
 }
 
 func (d *Driver) Drivable(locs DirectionQuery, reply *DirectionInfo) error {
@@ -123,7 +123,8 @@ func Query_to_Key_Nonreverse(geo1 Geo, geo2 Geo) (string, string) {
 	return k1, k2
 }
 
-func Drivable(lat1 string, lon1 string, lat2 string, lon2 string, api string) bool {
+func Drivable(lat1 string, lon1 string, lat2 string, lon2 string, api string) float64 {
+	// return travel distance, -1 for not drivable
 	loc1 := lat1 + ", " + lon1
 	loc2 := lat2 + ", " + lon2
 	fmt.Println(loc1)
@@ -151,7 +152,7 @@ func Drivable(lat1 string, lon1 string, lat2 string, lon2 string, api string) bo
 	geo2 := Geo{Lat: lat_g2, Lon: lon_g2}
 
 	// search for query in cache
-	var drivable bool
+	var drivable float64
 	var search_result []byte
 	var fail bool = false
 	var has_text bool = false
@@ -187,9 +188,15 @@ func Drivable(lat1 string, lon1 string, lat2 string, lon2 string, api string) bo
 				has_text = true
 				temp_s = temp.Text
 				if strings.Contains(temp_s, "ferry") || strings.Contains(temp_s, "ferries") {
-					drivable = false
+					drivable = -1.0
 				} else {
-					drivable = true
+					var temp_json interface{}
+					err := json.Unmarshal([]byte(temp_s), &temp_json)
+					if err != nil {
+						drivable = -1.0
+					} else {
+						drivable = temp_json.(map[string]interface{})["distance"].(map[string]interface{})["value"].(float64)
+					}
 				}
 			}
 		}
@@ -199,7 +206,7 @@ func Drivable(lat1 string, lon1 string, lat2 string, lon2 string, api string) bo
 	// save true
 	if key1 == key2 {
 		cacheLock.Lock()
-		cache[key1] = Drivability{Drivable: true, Text: ""}
+		cache[key1] = Drivability{Drivable: 0.0, Text: ""}
 		cacheLock.Unlock()
 		return true
 	}
@@ -222,18 +229,19 @@ func Drivable(lat1 string, lon1 string, lat2 string, lon2 string, api string) bo
 			if len(route) > 0 {
 				for _, r := range route {
 					search_result, _ = r.Legs[0].MarshalJSON()
+					distance := float64(r.Legs[0].Distance.Meters)
 					temp_s = strings.ToLower(fmt.Sprintf("%s", search_result))
 					if strings.Contains(temp_s, "ferry") || strings.Contains(temp_s, "ferries") {
-						drivable = false
+						drivable = -1.0
 					} else {
-						drivable = true
+						drivable = distance
 						break
 					}
 				}
 				// fmt.Println(string(search_result))
 			} else {
 				fmt.Println("Not drivable")
-				drivable = false
+				drivable = -1.0
 			}
 		}
 	}
