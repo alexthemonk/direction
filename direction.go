@@ -242,6 +242,7 @@ func Drivable(lat1 string, lon1 string, lat2 string, lon2 string, api string) fl
 					search_result, _ = r.Legs[0].MarshalJSON()
 					distance := float64(r.Legs[0].Distance.Meters)
 					temp_s = strings.ToLower(fmt.Sprintf("%s", search_result))
+					temp_s = ProcessText(temp_s)
 					if strings.Contains(temp_s, "ferry") || strings.Contains(temp_s, "ferries") {
 						drivable = -1.0
 					} else {
