@@ -232,13 +232,17 @@ func Drivable(lat1 string, lon1 string, lat2 string, lon2 string, api string) fl
 				for _, r := range route {
 					search_result, _ = r.Legs[0].MarshalJSON()
 					distance := float64(r.Legs[0].Distance.Meters)
-					temp_s = strings.ToLower(fmt.Sprintf("%s", search_result))
 
-					for i, step := range search_result["steps"] {
-						new_map := make(map[string]string)
-						new_map["html_instructions"] = step["html_instructions"]
-						search_result["steps"][i] = new_map
-					}
+					var text_map map[string]interface{}
+				  json.Unmarshal(search_result, &text_map)
+				  for i, step := range text_map["steps"].([]interface{}){
+				    for k, _ := range step.(map[string]interface{}){
+				      if k != "html_instructions"{
+				        delete(text_map["steps"].([]interface{})[i].(map[string]interface{}), k)
+				      }
+				    }
+				  }
+					temp_s = strings.ToLower(fmt.Sprintf("%s", json.Marshal(text_map)))
 
 					if strings.Contains(temp_s, "ferry") || strings.Contains(temp_s, "ferries") {
 						drivable = -1.0
