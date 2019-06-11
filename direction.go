@@ -156,7 +156,6 @@ func Drivable(lat1 string, lon1 string, lat2 string, lon2 string, api string) fl
 	// search for query in cache
 	var drivable float64
 	var search_result []byte
-	var fail bool = false
 	var has_text bool = false
 	var temp_s string
 
@@ -242,7 +241,8 @@ func Drivable(lat1 string, lon1 string, lat2 string, lon2 string, api string) fl
 							}
 						}
 					}
-					temp_s = strings.ToLower(fmt.Sprintf("%s", json.Marshal(text_map)))
+					tes, _ := json.Marshal(text_map)
+					temp_s = strings.ToLower(fmt.Sprintf("%s", tes))
 
 					if strings.Contains(temp_s, "ferry") || strings.Contains(temp_s, "ferries") {
 						drivable = -1.0
