@@ -123,17 +123,6 @@ func Query_to_Key_Nonreverse(geo1 Geo, geo2 Geo) (string, string) {
 	return k1, k2
 }
 
-func ProcessText(text string) string {
-	var dic map[string]interface{}
-	new_string := ""
-	json.Unmarshal([]byte(text), dic)
-
-	for _, step := range dic["steps"].([]interface{}) {
-		new_string += step.(map[string]string)["html_instructions"]
-	}
-	return new_string
-}
-
 func Drivable(lat1 string, lon1 string, lat2 string, lon2 string, api string) float64 {
 	// return travel distance, -1 for not drivable
 	loc1 := lat1 + ", " + lon1
@@ -141,10 +130,12 @@ func Drivable(lat1 string, lon1 string, lat2 string, lon2 string, api string) fl
 	fmt.Println(loc1)
 	fmt.Println(loc2)
 
+	var fail bool = false
 	// initialize the client for querying google api
 	client, err := maps.NewClient(maps.WithAPIKey(api))
 	if err != nil {
 		fmt.Println("Error initializing client: %s", err)
+		fail = true
 	}
 
 	// query for direction
@@ -242,7 +233,13 @@ func Drivable(lat1 string, lon1 string, lat2 string, lon2 string, api string) fl
 					search_result, _ = r.Legs[0].MarshalJSON()
 					distance := float64(r.Legs[0].Distance.Meters)
 					temp_s = strings.ToLower(fmt.Sprintf("%s", search_result))
-					temp_s = ProcessText(temp_s)
+
+					for i, step := range search_result["steps"] {
+						new_map := make(map[string]string)
+						new_map["html_instructions"] = step["html_instructions"]
+						search_result["steps"][i] = new_map
+					}
+
 					if strings.Contains(temp_s, "ferry") || strings.Contains(temp_s, "ferries") {
 						drivable = -1.0
 					} else {
