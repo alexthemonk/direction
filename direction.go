@@ -123,6 +123,17 @@ func Query_to_Key_Nonreverse(geo1 Geo, geo2 Geo) (string, string) {
 	return k1, k2
 }
 
+func ProcessText(text string) string {
+	var dic map[string]interface{}
+	new_string := ""
+	json.Unmarshal([]byte(text), dic)
+
+	for _, step := range dic["steps"].([]interface{}) {
+		new_string += step.(map[string]string)["html_instructions"]
+	}
+	return new_string
+}
+
 func Drivable(lat1 string, lon1 string, lat2 string, lon2 string, api string) float64 {
 	// return travel distance, -1 for not drivable
 	loc1 := lat1 + ", " + lon1
