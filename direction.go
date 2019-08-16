@@ -94,25 +94,6 @@ type Geo struct {
 	Lon float64
 }
 
-// func Query_to_Key(g geo.Geocoder, geo1 Geo, geo2 Geo) (string, string) {
-// 	result1, err1 := g.ReverseGeocode(geo1.Lat, geo1.Lon)
-// 	result2, err2 := g.ReverseGeocode(geo2.Lat, geo2.Lon)
-// 	if err1 != nil || err2 != nil {
-// 		fmt.Println("Error during reverse geocoding")
-// 		k1 := fmt.Sprintf("%.2f,%.2f - %.2f,%.2f",
-// 			geo1.Lat, geo1.Lon,
-// 			geo2.Lat, geo2.Lon)
-// 		k2 := fmt.Sprintf("%.2f,%.2f - %.2f,%.2f",
-// 			geo2.Lat, geo2.Lon,
-// 			geo1.Lat, geo1.Lon)
-// 		return k1, k2
-// 	}
-// 	name1 := result1.State + " " + result1.Country
-// 	name2 := result2.State + " " + result2.Country
-// 	// THOUGHT: postal code instead of city name?
-// 	return name1 + " - " + name2, name2 + " - " + name1
-// }
-
 func Query_to_Key_Nonreverse(geo1 Geo, geo2 Geo) (string, string) {
 	k1 := fmt.Sprintf("%.0f,%.0f - %.0f,%.0f",
 		geo1.Lat, geo1.Lon,
@@ -205,7 +186,7 @@ func Drivable(lat1 string, lon1 string, lat2 string, lon2 string, api string) fl
 	// not in cache
 	// if start and end at same city
 	// save true
-	if key1 == key2 {
+	if fmt.Sprintf("%.0f,%.0f", lat_g1, lon_g1) == fmt.Sprintf("%.0f,%.0f", lat_g2, lon_g2) {
 		cacheLock.Lock()
 		cache[key1] = Drivability{Drivable: 0.0, Text: ""}
 		cacheLock.Unlock()
