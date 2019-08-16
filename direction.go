@@ -137,7 +137,7 @@ func Drivable(lat1 string, lon1 string, lat2 string, lon2 string, api string) fl
 	// search for query in cache
 	var drivable float64
 	var search_result []byte
-	var has_text bool = false
+	var cacheHit bool = false
 	var temp_s string
 
 	// g := openstreetmap.Geocoder()
@@ -167,7 +167,7 @@ func Drivable(lat1 string, lon1 string, lat2 string, lon2 string, api string) fl
 			if temp.Text == "" {
 				return drivable
 			} else {
-				has_text = true
+				cacheHit = true
 				temp_s = temp.Text
 				if strings.Contains(temp_s, "ferry") || strings.Contains(temp_s, "ferries") {
 					drivable = -1.0
@@ -193,7 +193,7 @@ func Drivable(lat1 string, lon1 string, lat2 string, lon2 string, api string) fl
 		return 0.0
 	}
 
-	if !has_text {
+	if !cacheHit {
 		// spend some money and search
 		fmt.Println("Search")
 		route, _, err := client.Directions(context.Background(), query)
@@ -239,15 +239,6 @@ func Drivable(lat1 string, lon1 string, lat2 string, lon2 string, api string) fl
 			}
 		}
 	}
-
-	// the following only happens when not found in cache and got result from googlemaps
-
-	// now in route, it stores a map with all details from the direction api search
-	// result has the first direction from route
-	// result['legs'] has all the dirving
-	// not sure why it is an array
-	// for now just index the first element of legs
-
 	if !fail {
 		fmt.Println("Adding to Cache: ", key1, drivable)
 		cacheLock.Lock()
