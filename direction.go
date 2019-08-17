@@ -240,7 +240,9 @@ func Drivable(lat1 string, lon1 string, lat2 string, lon2 string, api string) fl
 		}
 	}
 	if !fail {
-		fmt.Println("Adding to Cache: ", key1, drivable)
+		if !cacheHit {
+			fmt.Println("Adding to Cache: ", key1, drivable)
+		}
 		cacheLock.Lock()
 		cache[key1] = Drivability{Drivable: drivable, Text: temp_s}
 		cacheLock.Unlock()
