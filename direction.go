@@ -162,8 +162,6 @@ func Drivable(lat1 string, lon1 string, lat2 string, lon2 string, api string) fl
 		}
 		cacheLock.RUnlock()
 		if ok {
-			fmt.Println("Found")
-			fmt.Println(drivable)
 			if temp.Text == "" {
 				return drivable
 			} else {
@@ -234,7 +232,6 @@ func Drivable(lat1 string, lon1 string, lat2 string, lon2 string, api string) fl
 				}
 				// fmt.Println(string(search_result))
 			} else {
-				fmt.Println("Not drivable")
 				drivable = -1.0
 			}
 		}
