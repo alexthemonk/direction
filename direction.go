@@ -138,7 +138,7 @@ func Drivable(lat1 string, lon1 string, lat2 string, lon2 string, api string) fl
 	var drivable float64
 	var search_result []byte
 	var cacheHit bool = false
-	var temp_s string
+	var text string
 
 	// g := openstreetmap.Geocoder()
 
@@ -165,6 +165,7 @@ func Drivable(lat1 string, lon1 string, lat2 string, lon2 string, api string) fl
 			if temp.Text == "" {
 				return drivable
 			} else {
+				var temp_s string
 				cacheHit = true
 				temp_s = temp.Text
 				if strings.Contains(temp_s, "ferry") || strings.Contains(temp_s, "ferries") {
@@ -208,6 +209,7 @@ func Drivable(lat1 string, lon1 string, lat2 string, lon2 string, api string) fl
 		} else {
 			if len(route) > 0 {
 				for _, r := range route {
+					var temp_s string
 					search_result, _ = r.Legs[0].MarshalJSON()
 					distance := float64(r.Legs[0].Distance.Meters)
 
@@ -225,24 +227,23 @@ func Drivable(lat1 string, lon1 string, lat2 string, lon2 string, api string) fl
 
 					if strings.Contains(temp_s, "ferry") || strings.Contains(temp_s, "ferries") {
 						drivable = -1.0
+						text = "ferry"
 					} else {
 						drivable = distance
+						text = "drivable"
 						break
 					}
+
+					fmt.Println("Adding to Cache: ", key1, drivable)
+					cacheLock.Lock()
+					cache[key1] = Drivability{Drivable: drivable, Text: temp_s}
+					cacheLock.Unlock()
 				}
 				// fmt.Println(string(search_result))
 			} else {
 				drivable = -1.0
 			}
 		}
-	}
-	if !fail {
-		if !cacheHit {
-			fmt.Println("Adding to Cache: ", key1, drivable)
-		}
-		cacheLock.Lock()
-		cache[key1] = Drivability{Drivable: drivable, Text: temp_s}
-		cacheLock.Unlock()
 	}
 	// fmt.Println(drivable)
 	return drivable
